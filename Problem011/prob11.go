@@ -82,6 +82,7 @@ func largestDiagProd(grid [][]int, size int) int {
 		return -1
 	}
 	
+	// Positive Diagonal
 	for i := 0; i <= len(grid)-size; i++ {
 		for j := 0; j <= len(grid[0])-size; j++ {
 			window := make([]int, size)
@@ -95,6 +96,7 @@ func largestDiagProd(grid [][]int, size int) int {
 		}
 	}
 
+	// Negative Diagonal
 	for i := 0; i <= len(grid)-size; i++ {
 		for j := size-1; j < len(grid[0]); j++ {
 			window := make([]int, size)
