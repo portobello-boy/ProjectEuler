@@ -3,7 +3,7 @@ import sympy.ntheory as nt
 def isTruncatablePrime(num, dir = 1):
     numArr = [int(i) for i in str(num)[::dir]]
     for n in range(len(numArr)):
-        val = sum([val * 10**(ind) for ind, val in enumerate(numArr[n:][::-1*dir])])
+        val = sum([val * 10**(ind) for ind, val in enumerate(numArr[n:][::-dir])])
         if not nt.isprime(val):
             return False
     return True

@@ -1,4 +1,3 @@
-from itertools import permutations
 import sympy.ntheory as nt
 
 bound = 1000000
