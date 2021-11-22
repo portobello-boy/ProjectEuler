@@ -1,5 +1,7 @@
+from types import FunctionType
 from typing import Dict, Generator, List, Set
-from math import floor, sqrt
+from math import ceil, floor, sqrt
+from MathLib.digits import numDigits
 
 from .constants import golden, firstPrimes
 
@@ -39,6 +41,30 @@ def fibonacciSequence(n:int) -> List[int]:
     n -- number of Fibonacci terms in sequence
     """
     return [fibonacci(i) for i in range(0, n)]
+
+def fibonacciClosure() -> FunctionType:
+    """
+    Return a function closure for recursively generating Fibonacci numbers
+
+    Closure function returns index and term for a Fibonacci number
+    """
+    index = -1
+    a = 0
+    b = 1
+    def func():
+        nonlocal a, b, index
+        retval = 0
+        if index == 0:
+            pass
+        elif index == 1:
+            retval = 1
+        else:
+            retval = a + b
+            a = b
+            b = retval
+        index += 1
+        return index, retval
+    return func
 
 def primeSequenceBoundedGenerator(n:int) -> Generator:
     """
@@ -124,6 +150,20 @@ def primeSequence(n:int) -> List[int]:
     """
     return list(primeSequenceGenerator(n))
 
+def evenOddFunctionSequence(evenFunc:FunctionType, oddFunc:FunctionType) -> FunctionType:
+    """
+    Return a function which applies given functions to even or odd terms of a sequence
+
+    Arguments:
+    evenFunc -- function to apply to even terms
+    oddFunc -- function to apply to odd terms
+    """
+    def func(n:int) -> int:
+        if n % 2 == 0:
+            return evenFunc(n)
+        return oddFunc(n)
+    return func
+
 """
 Tuples
 """
@@ -150,7 +190,7 @@ def divisorListGenerator(n:int) -> Generator:
     n -- integer for which to return the divisors
     """
     largerFactors = []
-    for i in range(1, int(sqrt(n))):
+    for i in range(1, int(sqrt(n)+1)):
         if n % i == 0:
             yield i
             if i*i != n:
@@ -159,14 +199,23 @@ def divisorListGenerator(n:int) -> Generator:
     for f in reversed(largerFactors):
         yield f
 
-def divisorList(n:int) -> List[int]:
+def divisorList(n:int) -> Set[int]:
     """
     Return a list of divisors of n
 
     Arguments:
     n -- integer for which to return the divisors
     """
-    return list(divisorListGenerator(n))
+    return set(divisorListGenerator(n))
+
+def properDivisorList(n:int) -> Set[int]:
+    """
+    Return a list of proper divisors of n
+
+    Arguments:
+    n -- integer for which to return the proper divisors
+    """
+    return divisorList(n).difference({n})
 
 def primeDivisorList(n:int) -> Dict:
     """
@@ -239,6 +288,63 @@ def lcm(a:int, b:int) -> int:
     """
     return int((abs(a) / gcd(a, b)) * abs(b))
 
+def isAmicable(n:int) -> bool:
+    """
+    Return true if n is an amicable number
+
+    Arguments:
+    n -- integer
+    """
+    m = sum(properDivisorList(n))
+    return sum(properDivisorList(m)) == n and n != m
+
+def isAmicablePair(m:int, n:int) -> bool:
+    """
+    Return true if m and n are amicable numbers
+
+    Arguments:
+    m, n -- integer
+    """
+    return sum(properDivisorList(m)) == n and n != m
+
+def isPerfect(n:int) -> bool:
+    """
+    Return true if n is a perfect number
+
+    Arguments:
+    n -- integer
+    """
+    return sum(properDivisorList(n)) == n
+
+def isAbundant(n:int) -> bool:
+    """
+    Return true if n is an abundant number
+
+    Arguments:
+    n -- integer
+    """
+    # print(n, divisorList(n), properDivisorList(n))
+    return sum(properDivisorList(n)) > n
+
+def isDeficient(n:int) -> bool:
+    """
+    Return true if n is a deficient number
+
+    Arguments:
+    n -- integer
+    """
+    return sum(properDivisorList(n)) < n
+
+def isNarcissistic(n:int) -> bool:
+    """
+    Return true if n is a narcissistic number
+
+    Arguments:
+    n -- integer
+    """
+    p = numDigits(n)
+    return n == sum([int(d) ** p for d in str(n)])
+
 """
 Primality
 """
@@ -275,3 +381,23 @@ def nextPrime(n:int) -> int:
             n += 2
         if isPrime(n):
             return n
+
+"""
+Congruences
+"""
+
+def multiplicativeOrder(a:int, n:int) -> int:
+    if gcd(a, n) != 1:
+        raise ValueError("Parameters a and n must be relatively prime")
+    
+    res = 1
+    k = 1
+    while k < n:
+        res = (res * a) % n
+
+        if res == 1:
+            return k
+        
+        k += 1
+    
+    raise RuntimeError("Multiplicative order not found")

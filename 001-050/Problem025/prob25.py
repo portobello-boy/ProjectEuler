@@ -1,23 +1,38 @@
-num = 1000
+"""
+The Fibonacci sequence is defined by the recurrence relation:
 
-def fibSeq():
-	ind = 1
-	i = 0
-	j = 1
-	def nextTerm():
-		nonlocal ind, i, j
-		ind += 1
-		k = i + j
-		i = j
-		j = k
-		return ind, k
+    Fn = Fn−1 + Fn−2, where F1 = 1 and F2 = 1.
 
-	return nextTerm
+Hence the first 12 terms will be:
 
-nextTerm = fibSeq()
+    F1 = 1
+    F2 = 1
+    F3 = 2
+    F4 = 3
+    F5 = 5
+    F6 = 8
+    F7 = 13
+    F8 = 21
+    F9 = 34
+    F10 = 55
+    F11 = 89
+    F12 = 144
 
-pair = nextTerm()
-while len(str(pair[1])) < num:
-	pair = nextTerm()
+The 12th term, F12, is the first term to contain three digits.
 
-print(pair)
+What is the index of the first term in the Fibonacci sequence to contain 1000 digits?
+"""
+
+from MathLib.numberTheory import fibonacciClosure
+
+TARGET = 1000
+
+def main():
+	fibonacci = fibonacciClosure()
+	term = (0, 0)
+	while len(str(term[1])) < TARGET:
+		term = fibonacci()
+	print(term)
+
+if __name__ == "__main__":
+    main()

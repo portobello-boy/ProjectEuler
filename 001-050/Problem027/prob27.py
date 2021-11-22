@@ -1,19 +1,18 @@
-import math
-import sympy.ntheory as nt
+"""
+See https://projecteuler.net/problem=27
+"""
 
-def genFunction(a, b):
-    def f(n):
-        return n**2 + a*n + b
-    return f
+from MathLib.polynomials import generatePolynomial
+from MathLib.numberTheory import isPrime
 
 def countConsecutivePrimes(a, b):
-    f = genFunction(a, b)
-    n = 0
+    f = generatePolynomial([1, a, b])
 
-    while nt.isprime(f(n)):
-        n += 1
+    x = 0
+    while isPrime(f(x)):
+        x += 1
 
-    return n
+    return x
 
 def bestCoefficientProduct(boundA, boundB):
     maxProd = 0
@@ -21,7 +20,7 @@ def bestCoefficientProduct(boundA, boundB):
 
     for a in range(boundA):
         for b in range(boundB+1):
-            if not nt.isprime(b):
+            if not isPrime(b):
                 continue
             if (x := countConsecutivePrimes(a, b)) > maxConsecutivePrimes:
                 maxConsecutivePrimes = x
@@ -38,4 +37,8 @@ def bestCoefficientProduct(boundA, boundB):
 
     return maxProd
 
-print(bestCoefficientProduct(1000, 1000))
+def main():
+    print(bestCoefficientProduct(1000, 1000))
+
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,5 @@
 from math import factorial
 
-num = factorial(100)
-string = str(num)
-digSum = sum([int(d) for d in string])
+digSum = sum([int(d) for d in str(factorial(100))])
 
 print(digSum)
