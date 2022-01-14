@@ -7,6 +7,9 @@ def numDigits(n:int) -> int:
 def isPalindrome(n:int) -> bool:
     return str(n) == str(n)[::-1]
 
+def getReversedNumber(n:int) -> int:
+    return int(str(n)[::-1])
+
 def digitProduct(n:int) -> int:
     return digitProduct([int(d) for d in str(n)])
 

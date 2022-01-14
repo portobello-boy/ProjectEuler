@@ -1,7 +1,7 @@
 from types import FunctionType
 from typing import Dict, Generator, List, Set
 from math import ceil, floor, sqrt
-from MathLib.digits import numDigits
+from MathLib.digits import numDigits, getReversedNumber, isPalindrome
 
 from .constants import golden, firstPrimes
 
@@ -344,6 +344,20 @@ def isNarcissistic(n:int) -> bool:
     """
     p = numDigits(n)
     return n == sum([int(d) ** p for d in str(n)])
+
+def isLychrel(n:int, depth:int = 50) -> bool:
+    """
+    Return true if n is a lychrel number
+
+    Arguments:
+    n -- integer
+    """
+    if depth == 0:
+        return False
+    elif isPalindrome(n + getReversedNumber(n)):
+        return True
+    else:
+        return isLychrel(n + getReversedNumber(n), depth-1)
 
 """
 Primality
