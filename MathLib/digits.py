@@ -1,9 +1,9 @@
-# Return true if the number is palindromic
 from typing import List
 
 def numDigits(n:int) -> int:
     return len(str(n))
 
+# Return true if the number is palindromic
 def isPalindrome(n:int) -> bool:
     return str(n) == str(n)[::-1]
 
@@ -29,3 +29,9 @@ def digitProductMax(n:int, s:int) -> int:
         if prod > max:
             max = prod
     return max
+
+def concatDigits(n:int, m:int) -> int:
+    """
+    Given integers n and m, concatenage the digits of m to n
+    """
+    return int(''.join([str(n), str(m)]))

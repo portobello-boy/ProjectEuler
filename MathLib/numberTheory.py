@@ -148,7 +148,7 @@ def primeSequence(n:int) -> List[int]:
     Arguments:
     n -- number of prime numbers in sequence
     """
-    return list(primeSequenceGenerator(n))
+    return list(primeSequenceGenerator(n-1))
 
 def evenOddFunctionSequence(evenFunc:FunctionType, oddFunc:FunctionType) -> FunctionType:
     """
@@ -381,7 +381,7 @@ def isPrime(n:int) -> bool:
 
 def nextPrime(n:int) -> int:
     """
-    Given n, return (n+1)th prime number
+    Given n, return the next prime number above n
 
     Arguments:
     n -- integer
