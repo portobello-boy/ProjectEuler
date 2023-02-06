@@ -21,7 +21,7 @@ def get_tangent_slope(x, y) -> float:
 def get_normal_slope(x, y) -> float:
     return -1 / get_tangent_slope(x, y)
 
-def points_of_intersect(m, c, a = A, b = B) -> (float, float):
+def points_of_intersect(m, c, a = A, b = B) -> tuple[float, float]:
     x = Symbol('x')
     line_eq = m*x + c
     intersect_eq = ((a**2)*(m**2) + b**2)*(x**2) + (2*(a**2)*m*c)*x + (a**2 * (c**2 - b**2))
@@ -37,7 +37,7 @@ def points_of_intersect(m, c, a = A, b = B) -> (float, float):
     return {p1, p2}
 
 # http://www.sdmath.com/math/geometry/reflection_across_line.html
-def reflect_point_across_line(x, y, m, c) -> (float, float):
+def reflect_point_across_line(x, y, m, c) -> tuple[float, float]:
     u = ((1 - m**2)*x + 2*m*y - 2*m*c)/((m**2) + 1)
     v = ((m**2 - 1)*y + 2*m*x + 2*c)/((m**2) + 1)
     return u, v
@@ -45,7 +45,7 @@ def reflect_point_across_line(x, y, m, c) -> (float, float):
 def points_are_close(x1, y1, x2, y2, p=4) -> bool:
     return (((x1-x2)**2) + ((y1-y2)**2))**0.5 < 10**-p
 
-def order_points(points,old_point) -> [(float, float), (float, float)]:
+def order_points(points,old_point) -> list[tuple[float, float]]:
     points = tuple(points)
     p1, p2 = points[0], points[1]
 

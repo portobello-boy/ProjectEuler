@@ -1,6 +1,6 @@
 from types import FunctionType
 from typing import Dict, Generator, List, Set
-from math import ceil, floor, sqrt
+from math import ceil, floor, sqrt, comb
 from MathLib.digits import numDigits, getReversedNumber, isPalindrome
 
 from .constants import golden, firstPrimes
@@ -21,6 +21,16 @@ def triangle(n:int) -> int:
     n -- parameter for nth triangular number
     """
     return int(n * (n+1)/2)
+
+def polygonal(r:int, n:int) -> int:
+    """
+    Return nth polygonal number of dimension r
+    
+    Arguments:
+    r -- dimension of polygonal number
+    n -- which polygonal number to generate
+    """
+    return int(1 + (r-1)*(n-1) + 0.5*(n-2)*(n-1)*(r-2))
 
 def fibonacci(n:int) -> int:
     """

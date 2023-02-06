@@ -1,1 +1,3 @@
 *.pyc
+MathLib.egg-info/
+*/__pycache__
