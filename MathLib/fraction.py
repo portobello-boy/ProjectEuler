@@ -1,5 +1,9 @@
 from typing import Optional, Sequence
+from math import sqrt, floor
 from MathLib.numberTheory import gcd
+from decimal import Decimal, getcontext
+
+getcontext().prec = 100
 
 class Fraction:
     """
@@ -39,7 +43,25 @@ class ContinuedFraction:
         self.a = addend
         self.n = numerator
         self.d = denominator
+        self.r = 0
         self.inf = infinite
+        
+    def __init__(self, number:float = 0, depth:int = 10):
+        epsilon = 10**-30
+        self.inf = False
+        self.a = int(floor(number))
+        r = number - floor(number)
+        self.r = r
+        if r < epsilon:
+            self.n = 0
+            self.r = 0
+            self.d = None
+        else:
+            self.n = 1
+            if depth == 1:
+                self.d = None
+            else:
+                self.d = ContinuedFraction(Decimal('1.0')/Decimal(str(r)), depth=depth-1)
 
     def copy(self) -> 'ContinuedFraction':
         """
@@ -77,6 +99,9 @@ class ContinuedFraction:
         """
         # print("a: {}, n: {}, d: {}, inf: {}, depth: {}".format(self.a, self.n, self.d, self.inf, depth))
 
+        if depth == 0 or self.d == None:
+            return Fraction(self.a)
+
         if not depth == 0 and self.inf:
             # print("INFINITE")
             subFrac = Fraction(self.n) * self.evaluateFraction(depth = depth-1).reciprocal()
@@ -85,7 +110,7 @@ class ContinuedFraction:
         if (depth == 0 and self.inf) or self.n == 0 or self.d is None:
             return Fraction(self.a)
             
-        subFrac = Fraction(self.n) * self.d.evaluateFraction(depth = depth).reciprocal()
+        subFrac = Fraction(self.n) * self.d.evaluateFraction(depth = depth-1).reciprocal()
         return subFrac.addInt(self.a)
 
     @staticmethod
@@ -126,6 +151,28 @@ class ContinuedFraction:
             sequence.append(fraction.a)
             fraction = fraction.d
         return sequence
+    
+    def expand(self, times:int = 1) -> 'ContinuedFraction':
+        """
+        Expand a continued fraction with the next term in the sequence
+
+        Arguments:
+        times -- The amount of times to expand
+        """
+
+        epsilon = 10**-30
+        recurse = self
+        while recurse.d is not None:
+            recurse.inf = False # Can't have an infinite fraction in the middle
+            recurse = recurse.d
+            
+        for t in range(times):
+            if recurse.r < epsilon:
+                return
+            
+            recurse.append(ContinuedFraction(Decimal('1.0')/Decimal(str(recurse.r)), depth=1))
+            
+            recurse = recurse.d
 
     def append(self, fraction:'ContinuedFraction') -> 'ContinuedFraction':
         """
@@ -142,3 +189,27 @@ class ContinuedFraction:
 
         recurse.d = fraction
         return self
+    
+class ContinuedFractionSquareRootCanonicalForm:
+    def __init__(self, N):
+        self.N = N
+        self.m = 0
+        self.d = 1
+        self.a = floor(sqrt(N))
+        
+    # https://en.wikipedia.org/wiki/Periodic_continued_fraction#Canonical_form_and_repetend
+    def iterate(self):
+        self.m = self.d*self.a - self.m
+        self.d = floor((self.N - self.m**2)/self.d)
+        self.a = floor((sqrt(self.N) + self.m)/self.d)
+        return self
+        
+    def __eq__(self,other):
+        return self.N == other.N and self.m == other.m and self.d == other.d and self.a == other.a
+        
+    def copy(self):
+        other = ContinuedFractionSquareRootCanonicalForm(self.N)
+        other.m = self.m
+        other.d = self.d
+        other.a = self.a
+        return other

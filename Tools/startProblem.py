@@ -9,4 +9,4 @@ probNum = int(sys.argv[1])
 probPath = "{:03d}-{:03d}/Problem{:03d}".format((50*(probNum//50))+1, 50*((probNum//50)+1), probNum)
 
 os.makedirs(probPath, exist_ok=True)
-open("{}/prob{:03d}.py".format(probPath, probNum), 'a').close()
+open("{}/prob{}.py".format(probPath, probNum), 'a').close()
