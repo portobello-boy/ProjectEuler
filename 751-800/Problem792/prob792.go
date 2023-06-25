@@ -15,9 +15,43 @@ import (
 	"fmt"
 	"math"
 	"math/bits"
+	"regexp"
 
 	"gonum.org/v1/gonum/stat/combin"
 )
+
+// Observations:
+// (2k choose k) is always even
+// S(n) can be generated more easily using previous terms
+// 3S(n) + 4 guarantees that v2(result) is > 2
+
+var re *regexp.Regexp = regexp.MustCompile(`^[01\s]*(110|001)[01\s]*100$`)
+
+func numToBinaryString(num int64, addSpace bool) string {
+	bin := fmt.Sprintf("%032b", uint32(num))
+
+	if addSpace {
+		for i := 4; i < len(bin); i += 5 {
+			bin = bin[:i] + " " + bin[i:]
+		}
+	}
+	return bin
+}
+
+func altv2(n int64) int64 {
+	snBinaryNoPad := numToBinaryString(n, false)
+
+	regexmatch := re.Match([]byte(snBinaryNoPad))
+
+	ret := int64(0)
+
+	if regexmatch {
+		matches := re.FindStringSubmatchIndex(snBinaryNoPad)
+		ret = int64((len(snBinaryNoPad) - matches[2]) - 1)
+	}
+
+	return ret
+}
 
 func v2(n int64) int64 {
 	return int64(bits.TrailingZeros64(uint64(n)))
@@ -26,15 +60,49 @@ func v2(n int64) int64 {
 func S(n int64) int64 {
 	sum := int64(0)
 	for k := int64(1); k <= n; k++ {
-		sum += (int64(math.Pow(-2, float64(k))) * int64(combin.Binomial(int(2*k), int(k))))
+		pow2 := int64(math.Pow(-2, float64(k)))
+		binom := int64(combin.Binomial(int(2*k), int(k)))
+		term := (pow2 * binom)
+
+		sum += term
+
+		// fmt.Printf("S(%d) - k: %2d, term: %10d, binary: %s, binomial term: %6d, binomial binary: %s\n", n, k, term, numToBinaryString(term), binom, numToBinaryString(binom))
+		fmt.Printf("S(%d) - k: %2d, binomial term: %6d, binomial binary: %s\n", n, k, binom, numToBinaryString(binom, true))
+		fmt.Printf("                       Term: %10d, binary term: %s\n", term, numToBinaryString(term, true))
+		fmt.Printf("                  Sum so far: %10d, binary sum: %s\n", sum, numToBinaryString(sum, true))
+		fmt.Printf("\n")
 	}
+
+	fmt.Printf("                       S(%d): %10d, binary S(%d): %s\n", n, sum, n, numToBinaryString(sum, true))
+	fmt.Printf("                 3*(S(%d)+4): %10d, binary     : %s\n", n, (3*sum)+4, numToBinaryString((3*sum)+4, true))
+	fmt.Printf("                                               v2(x): %10d\n", v2((3*sum)+4))
+	fmt.Printf("                                  alt v2(Sum so far): %10d\n", altv2(sum))
 	return sum
 }
 
 func u(n int64) int64 {
 	sn := S(n)
-	fmt.Println(sn)
-	return v2((3 * S(n)) + 4)
+	snBinary := numToBinaryString(sn, true)
+	snBinaryNoPad := numToBinaryString(sn, false)
+	fmt.Printf("S(%d): %10d, binary S(%d): %s\n", n, sn, n, snBinary)
+	fmt.Printf("                           <<: %s\n", numToBinaryString((sn<<1), true))
+	fmt.Printf("                       3*S(%d): %s\n", n, numToBinaryString(3*sn, true))
+	fmt.Printf("                     3*S(%d)+4: %s\n", n, numToBinaryString((3*sn)+4, true))
+	fmt.Printf("                 v2(3*S(%d)+4): %d\n", n, v2((3*sn)+4))
+	// fmt.Printf("S(%d): %10d, binary S(%d): %s\n", n, sn, n, snBinary)
+
+	pattern := `^[01\s]*(110|001)[01\s]*100$`
+	re := regexp.MustCompile(pattern)
+
+	regexmatch := re.Match([]byte(snBinaryNoPad))
+	fmt.Printf("%s matches pattern %s: %t\n", snBinary, pattern, regexmatch)
+
+	if regexmatch {
+		matches := re.FindStringSubmatchIndex(snBinaryNoPad)
+		fmt.Println((len(snBinaryNoPad) - matches[2]) - 1)
+	}
+
+	return v2((3 * sn) + 4)
 }
 
 func U(N int) int64 {
@@ -47,9 +115,14 @@ func U(N int) int64 {
 }
 
 func main() {
-	fmt.Println(S(8))
+
+	for i := 1; i <= 5; i++ {
+		fmt.Println(S(int64(i)))
+	}
+
+	// fmt.Println(S(8))
 	// fmt.Println(v2(24))
 	// fmt.Println(S(4))
-	// fmt.Println(u(4))
-	// fmt.Println(U(5))
+	// fmt.Println(u(6))
+	// fmt.Println(U(2))
 }
