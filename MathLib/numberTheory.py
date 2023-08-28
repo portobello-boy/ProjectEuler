@@ -209,6 +209,8 @@ def divisorListGenerator(n:int) -> Generator:
     for f in reversed(largerFactors):
         yield f
 
+    yield n
+
 def divisorList(n:int) -> Set[int]:
     """
     Return a list of divisors of n
@@ -225,7 +227,9 @@ def properDivisorList(n:int) -> Set[int]:
     Arguments:
     n -- integer for which to return the proper divisors
     """
-    return divisorList(n).difference({n})
+    divisors = divisorList(n)
+    divisors.remove(n)
+    return divisors
 
 def primeDivisorList(n:int) -> Dict:
     """
