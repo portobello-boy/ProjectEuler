@@ -1,3 +1,5 @@
-go 1.20
+go 1.21.0
 
 use ./751-800/Problem792
+
+use ./051-100/Problem096
