@@ -1,5 +1,11 @@
 go 1.21.0
 
-use ./751-800/Problem792
-
-use ./051-100/Problem096
+use (
+	./051-100/Problem070
+	./051-100/Problem096
+	./651-700/Problem662
+	./751-800/Problem792
+	./801-850/Problem829
+	./MathLibGo
+	./MathLibGo/numberTheory
+)

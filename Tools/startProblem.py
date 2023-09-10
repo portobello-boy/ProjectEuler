@@ -7,7 +7,7 @@ if len(sys.argv) != 2:
     
 probNum = int(sys.argv[1])
 block = probNum // 50
-probPath = f'{50*block+1:03d}-{50*(block+1)}/Problem{probNum}'
+probPath = f'{50*block+1:03d}-{50*(block+1):03d}/Problem{probNum:03d}'
 # probPath = "{:03d}-{:03d}/Problem{:03d}".format((50*(probNum//50))+1, 50*((probNum//50)+1), probNum)
 
 os.makedirs(probPath, exist_ok=True)

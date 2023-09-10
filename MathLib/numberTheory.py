@@ -1,6 +1,7 @@
 from types import FunctionType
 from typing import Dict, Generator, List, Set
-from math import ceil, floor, sqrt, comb
+from math import ceil, floor, sqrt, comb, prod
+from functools import reduce
 from MathLib.digits import numDigits, getReversedNumber, isPalindrome
 
 from .constants import golden, firstPrimes
@@ -242,14 +243,14 @@ def primeDivisorList(n:int) -> Dict:
     k = 2
     while n != 1:
         while n % k == 0:
-            n = n / k
+            n = n / k # type: ignore
             if not k in primeFactorMap:
                 primeFactorMap[k] = 0
             primeFactorMap[k] += 1
         k = nextPrime(k)
     return primeFactorMap
 
-def sumOfMultsOfN(n:int, bound:int) -> Set[int]:
+def sumOfMultsOfN(n:int, bound:int) -> int:
     """
     Return sum of all multiples of n below bound
 
@@ -279,19 +280,16 @@ def gcd(a:int, b:int) -> int:
         if b & 1 == 0:
             return 2*gcd(a >> 1, b >> 1)
         # v is odd
-        else:
-            return gcd(a >> 1, b)
+        return gcd(a >> 1, b)
     # u is odd
-    elif a & 1 != 0:
-        # v is even
-        if b & 1 == 0:
-            return gcd(a, b >> 1)
-        # v is odd and u is greater than v
-        elif a > b and b & 1 != 0:
-            return gcd((a-b) >> 1, b)
-        # v is odd and u is smaller than v
-        else:
-            return gcd((b-a) >> 1, a)
+    # v is even
+    if b & 1 == 0:
+        return gcd(a, b >> 1)
+    # v is odd and u is greater than v
+    elif a > b and b & 1 != 0:
+        return gcd((a-b) >> 1, b)
+    # v is odd and u is smaller than v
+    return gcd((b-a) >> 1, a)
 
 def lcm(a:int, b:int) -> int:
     """
@@ -301,6 +299,9 @@ def lcm(a:int, b:int) -> int:
     a, b -- integers for which to determine the lcm
     """
     return int((abs(a) / gcd(a, b)) * abs(b))
+
+def totient(a:int) -> int:
+    return round(a * prod([(1.0 - 1.0/p) for p in primeDivisorList(a).keys()]))
 
 def isAmicable(n:int) -> bool:
     """
@@ -409,6 +410,22 @@ def nextPrime(n:int) -> int:
             n += 2
         if isPrime(n):
             return n
+
+def primeSieve(bound:int) -> list[int]:
+    """
+    Given bound, return set of primes below bound
+    Thanks, Cameron
+    
+    Arguments:
+    bound -- integer
+    """
+    composite = set()
+    for i in range(2, int(bound**0.5)+2):
+        if i in composite:
+            continue
+        for j in range(i**2, bound, i):
+            composite.add(j)
+    return sorted(set(range(2, bound)).difference(composite))
 
 """
 Congruences

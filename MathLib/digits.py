@@ -1,4 +1,5 @@
 from typing import List
+import collections
 
 def numDigits(n:int) -> int:
     return len(str(n))
@@ -7,10 +8,18 @@ def numDigits(n:int) -> int:
 def isPalindrome(n:int) -> bool:
     return str(n) == str(n)[::-1]
 
+def isPermutation(n:int, m:int) -> bool:
+    d = collections.defaultdict(int)
+    for x in str(n):
+        d[x] += 1
+    for x in str(m):
+        d[x] -= 1
+    return not any(d.values())
+
 def getReversedNumber(n:int) -> int:
     return int(str(n)[::-1])
 
-def digitProduct(n:int) -> int:
+def digitProduct(n:int) -> int: # type: ignore
     return digitProduct([int(d) for d in str(n)])
 
 def digitProduct(n:List[int]) -> int:
