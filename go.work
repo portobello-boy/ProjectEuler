@@ -1,8 +1,9 @@
-go 1.21.0
+go 1.21.4
 
 use (
 	./051-100/Problem070
 	./051-100/Problem096
+	./051-100/Problem097
 	./651-700/Problem662
 	./751-800/Problem792
 	./801-850/Problem829
