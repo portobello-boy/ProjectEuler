@@ -1,14 +1,12 @@
 LENGTH = 50
 MIN_BLOCK_SIZE = 3
 
-GAP_CACHE = {}
+from functools import cache
 
+@cache
 def solution(remainingSpaces):
     if remainingSpaces < MIN_BLOCK_SIZE:
         return 0
-    
-    if remainingSpaces in GAP_CACHE:
-        return GAP_CACHE[remainingSpaces]
     
     total_combinations = 0
     for position in range(remainingSpaces):
@@ -20,8 +18,7 @@ def solution(remainingSpaces):
 
             next_position = position + blockSize + 1
             total_combinations += solution(remainingSpaces - next_position)
-            
-    GAP_CACHE[remainingSpaces] = total_combinations
+
     return total_combinations
 
 def main():
