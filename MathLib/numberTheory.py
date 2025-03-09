@@ -1,7 +1,7 @@
 from types import FunctionType
 from typing import Dict, Generator, List, Set
 from math import ceil, floor, sqrt, comb, prod
-from functools import reduce
+from functools import reduce, cache
 from MathLib.digits import numDigits, getReversedNumber, isPalindrome
 
 from .constants import golden, firstPrimes
@@ -241,7 +241,7 @@ def primeDivisorList(n:int) -> Dict:
     """
     primeFactorMap = {}
     k = 2
-    while n != 1:
+    while n != 1 and k ** 2 < n:
         while n % k == 0:
             n = n / k # type: ignore
             if not k in primeFactorMap:
@@ -260,6 +260,7 @@ def sumOfMultsOfN(n:int, bound:int) -> int:
     """
     return n * triangle(floor(bound/n))
 
+@cache
 def gcd(a:int, b:int) -> int:
     """
     Return greatest common divisor of u and v
@@ -295,13 +296,41 @@ def lcm(a:int, b:int) -> int:
     """
     Return least common multiple of a and b
 
-    Arguments:
-    a, b -- integers for which to determine the lcm
+    Args:
+        a (int): 
+        b (int):
+    
+    Returns:
+        int: Least common multiple of a and b
     """
     return int((abs(a) / gcd(a, b)) * abs(b))
 
 def totient(a:int) -> int:
-    return round(a * prod([(1.0 - 1.0/p) for p in primeDivisorList(a).keys()]))
+    """
+    Borrowed from https://www.geeksforgeeks.org/eulers-totient-function/#
+
+    Args:
+        a (int): An integer
+
+    Returns:
+        int: Count of relatively prime numbers less than a
+    """
+    # return round(a * prod([(1.0 - 1.0/p) for p in primeDivisorList(a).keys()]))
+    
+    # Initialize result of phi(a) = a
+    result = a
+    
+    # Consider all primes <= sqrt(a) AND their multiples
+    while (k := 2) ** 2 < a:
+        if k % a == 0:
+            while k % a == 0:
+                a = a // k
+            result -= result // k
+        k = nextPrime(k)
+        
+    if a > 1:
+        result -= result // a
+    return result
 
 def isAmicable(n:int) -> bool:
     """
@@ -377,7 +406,7 @@ def isLychrel(n:int, depth:int = 50) -> bool:
 """
 Primality
 """
-
+@cache
 def isPrime(n:int) -> bool:
     """
     Determine if n is prime
@@ -394,6 +423,7 @@ def isPrime(n:int) -> bool:
             return False
     return True
 
+@cache
 def nextPrime(n:int) -> int:
     """
     Given n, return the next prime number above n
