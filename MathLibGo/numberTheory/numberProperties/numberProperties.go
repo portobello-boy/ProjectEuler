@@ -1,10 +1,10 @@
 package numberproperties
 
 import (
+	"MathLibGo/numberTheory/divisors"
+	"MathLibGo/numberTheory/tools"
 	"errors"
 	"math"
-	"numberTheory/divisors"
-	"numberTheory/tools"
 )
 
 func Gcd(a, b int) int {

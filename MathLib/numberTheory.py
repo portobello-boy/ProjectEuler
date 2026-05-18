@@ -3,6 +3,7 @@ from typing import Dict, Generator, List, Set
 from math import ceil, floor, sqrt, comb, prod
 from functools import reduce, cache
 from MathLib.digits import numDigits, getReversedNumber, isPalindrome
+from functools import lru_cache
 
 from .constants import golden, firstPrimes
 
@@ -122,7 +123,7 @@ def primeSequenceBounded(n:int) -> List[int]:
 
 def primeSequenceGenerator(n:int) -> Generator:
     """
-    RReturn a generator for n prime numbers
+    Return a generator for n prime numbers
 
     Arguments:
     n -- number of prime numbers in sequence
@@ -174,6 +175,32 @@ def evenOddFunctionSequence(evenFunc:FunctionType, oddFunc:FunctionType) -> Func
             return evenFunc(n)
         return oddFunc(n)
     return func
+
+@lru_cache(maxsize=None)
+def partitionCount(n: int) -> int:
+    if n < 0:
+        return 0
+    if n == 0:
+        return 1
+    
+    i = 1
+    sum = 0
+
+    while True:
+        p1 = polygonal(5, i)
+        p2 = polygonal(5, -i)
+        
+        if p1 > n:
+            break
+        sum += ((-1)**(i+1) * partitionCount(n - p1))
+        
+        if p2 > n:
+            break
+        sum += ((-1)**(i+1) * partitionCount(n - p2))
+        
+        i += 1
+    
+    return sum
 
 """
 Tuples

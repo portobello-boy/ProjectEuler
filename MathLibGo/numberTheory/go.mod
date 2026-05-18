@@ -1,3 +1,3 @@
-module numberTheory
+module MathLibGo/numberTheory
 
-go 1.21.0
+go 1.24.1

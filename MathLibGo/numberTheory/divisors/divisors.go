@@ -1,11 +1,13 @@
 package divisors
 
 import (
+	"MathLibGo/numberTheory/primes"
 	"container/list"
 	"errors"
 	"math"
-	"numberTheory/primes"
 )
+
+var divisorCache = make(map[int][]int)
 
 func divisorListProducer(n int) <-chan int {
 	divisors := make(chan int, n)

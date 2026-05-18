@@ -1,12 +1,20 @@
-go 1.21.4
+go 1.24.1
 
 use (
 	./051-100/Problem070
+	./051-100/Problem074
+	./051-100/Problem087
+	./051-100/Problem092
 	./051-100/Problem096
 	./051-100/Problem097
+	./051-100/Problem098
+	./051-100/Problem100
+	./101-150/Problem108
+	./101-150/Problem109
 	./651-700/Problem662
 	./751-800/Problem792
 	./801-850/Problem829
 	./MathLibGo
 	./MathLibGo/numberTheory
+	./MathLibGo/operations
 )
