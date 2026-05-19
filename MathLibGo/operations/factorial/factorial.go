@@ -11,11 +11,11 @@ func Factorial(n int64) int64 {
 	return prod
 }
 
-func DoubleFactorial(n int64) int64 {
-	prod := int64(1)
+func DoubleFactorial(n uint64) uint64 {
+	prod := uint64(1)
 
 	for n > 1 {
-		prod *= int64(n)
+		prod *= uint64(n)
 		n -= 2
 	}
 

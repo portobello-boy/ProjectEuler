@@ -1,23 +1,24 @@
 package main
 
 import (
+	"MathLibGo/numberTheory/primes"
+	"MathLibGo/operations/factorial"
 	"fmt"
 	"math"
-	"numberTheory"
 	"time"
 )
 
-var BOUND int64 = 31
-var exploredTree map[int64]*Tree = make(map[int64]*Tree)
-var leafCountRootMap map[int64]map[int64]struct{} = make(map[int64]map[int64]struct{})
+var BOUND uint64 = 31
+var hashMapToValue = map[uint64][]uint64{}
+var hashMapIndex = uint64(2)
 
 type Tree struct {
-	val   int64
+	val   uint64
 	left  *Tree
 	right *Tree
 }
 
-func newLeaf(value int64) *Tree {
+func newLeaf(value uint64) *Tree {
 	return &Tree{
 		value,
 		nil,
@@ -25,28 +26,18 @@ func newLeaf(value int64) *Tree {
 	}
 }
 
-func buildTree(rootValue int64) *Tree {
-	if val, found := exploredTree[rootValue]; found {
-		return val
-	}
-
+func buildTree(rootValue uint64) *Tree {
 	root := newLeaf(rootValue)
 	left, right := optimalFactors(rootValue)
 	if !(left == 1 && right == rootValue) {
 		root.left = buildTree(left)
 		root.right = buildTree(right)
 	}
-	leafCount := int64(root.countLeaves())
-	exploredTree[rootValue] = root
-	if _, ok := leafCountRootMap[leafCount]; !ok {
-		leafCountRootMap[leafCount] = make(map[int64]struct{})
-	}
-	leafCountRootMap[leafCount][root.val] = struct{}{} // map count of leaves to "set" of root values
 	return root
 }
 
-func optimalFactors(value int64) (int64, int64) {
-	sqrt := int64(math.Sqrt(float64(value)))
+func optimalFactors(value uint64) (uint64, uint64) {
+	sqrt := uint64(math.Sqrt(float64(value)))
 	for n := sqrt; n > 1; n-- {
 		if value%n == 0 {
 			return n, value / n
@@ -70,26 +61,11 @@ func (t *Tree) isLeaf() bool {
 	return t.left == nil && t.right == nil
 }
 
-func (t *Tree) countLeaves() int {
+func (t *Tree) countLeaves() uint64 {
 	if t.isLeaf() {
 		return 1
 	}
 	return t.left.countLeaves() + t.right.countLeaves()
-}
-
-func (t *Tree) isSameStructure(other *Tree) bool {
-	if other == nil {
-		return false
-	}
-	tLeaf := t.isLeaf()
-	oLeaf := other.isLeaf()
-
-	if tLeaf != oLeaf {
-		return false
-	} else if tLeaf && oLeaf {
-		return true
-	}
-	return t.left.isSameStructure(other.left) && t.right.isSameStructure(other.right)
 }
 
 func (t *Tree) Print() {
@@ -102,128 +78,137 @@ func (t *Tree) Print() {
 	}
 }
 
-func (t *Tree) setLeavesToTwo() {
-	if t.isLeaf() {
-		t.val = 2
-	} else {
-		t.left.setLeavesToTwo()
-		t.right.setLeavesToTwo()
-		t.val = t.left.val * t.right.val
+func (t *Tree) hash() uint64 {
+	frontier := []*Tree{t}
+	hash := uint64(0)
+
+	for len(frontier) > 0 {
+		next := []*Tree{}
+		hasNext := false
+		for _, node := range frontier {
+			hash = hash << 1
+			if node != nil {
+				hash += 1
+				next = append(next, node.left, node.right)
+				hasNext = true
+				// } else {
+				// 	next = append(next, nil, nil)
+			}
+		}
+		frontier = next
+		if !hasNext {
+			break
+		}
 	}
+
+	for hash%2 == 0 {
+		hash = hash >> 1
+	}
+
+	return hash
 }
 
-func (t *Tree) buildMatchingTreeRoot() int64 {
-	// Recurse depth-first left, build matching subtree where all leaves are 2
-	candidateTree := t.copy()
-	candidateTree.left.setLeavesToTwo()
-	candidateTree.val = candidateTree.left.val * candidateTree.right.val
-
-	// Find first right subtree which matches the base right subtree
-	candidateRight := t.right.val
-	for rootVal := range leafCountRootMap[int64(candidateTree.right.countLeaves())] {
-		if rootVal < candidateTree.left.val {
-			continue
-		}
-		if rootVal < candidateRight && candidateTree.right.isSameStructure(buildTree(rootVal)) {
-			candidateRight = rootVal
+func getMinimalTreeValue(hash uint64, lowerBound uint64) uint64 {
+	if values, ok := hashMapToValue[hash]; ok {
+		for _, value := range values {
+			if value > lowerBound {
+				return value
+			}
 		}
 	}
 
-	fmt.Println("Checking range:", candidateTree.left.val, candidateRight)
+	t := buildTree(uint64(hashMapIndex))
 
-	for i := candidateTree.left.val; i <= candidateRight; i++ {
-		iTree := buildTree(i)
-
-		if !iTree.isSameStructure(candidateTree.right) {
-			continue
+	for t.hash() != hash || hashMapIndex < lowerBound {
+		if _, ok := hashMapToValue[t.hash()]; !ok {
+			hashMapToValue[t.hash()] = make([]uint64, 0)
 		}
-		candidateRight = i
-		break
+		hashMapToValue[t.hash()] = append(hashMapToValue[t.hash()], uint64(hashMapIndex))
+		hashMapIndex++
+		t = buildTree(uint64(hashMapIndex))
 	}
-	// return product of left and right root vals
-	return candidateTree.left.val * candidateRight
+
+	return hashMapIndex
 }
 
-func M(n int64) int64 {
-	nTree := buildTree(numberTheory.DoubleFactorial(int(n)))
-	if nTree.left == nil {
-		return 2
+func S(n *Tree, lowerBound uint64) uint64 {
+	if n.isLeaf() {
+		p := 2
+		for p < int(lowerBound) {
+			p, _ = primes.NextPrime(int(lowerBound))
+		}
+		return uint64(p)
 	}
 
-	return nTree.buildMatchingTreeRoot()
+	nHash := n.hash()
 
-	// var leftSubtree *Tree = nil
-	// var rightSubtree *Tree = nil
+	if values, ok := hashMapToValue[nHash]; ok {
+		for _, value := range values {
+			if value > lowerBound {
+				return value
+			}
+		}
+	}
 
-	// for i := int64(2); ; i++ {
-	// 	if i%100000 == 0 {
-	// 		fmt.Println(n, i)
-	// 	}
-	// 	iTree := buildTree(i)
+	// Find the lowest value matching the hash of the left child
+	lv := S(n.left, 0)
 
-	// 	if !iTree.isSameStructure(nTree.left) {
-	// 		continue
-	// 	}
+	// Find the lowest value matching the hash of the right child, value must be greater than lv
+	rv := S(n.right, lv)
 
-	// 	leftSubtree = iTree
-	// 	break
-	// }
+	val := lv * rv
 
-	// for i := leftSubtree.val; ; i++ {
-	// 	if i%100000 == 0 {
-	// 		fmt.Println(n, i)
-	// 	}
-	// 	iTree := buildTree(i)
+	if lv*rv < lowerBound {
+		val = getMinimalTreeValue(nHash, lowerBound)
+	}
 
-	// 	if !iTree.isSameStructure(nTree.right) {
-	// 		continue
-	// 	}
-	// 	rightSubtree = iTree
-	// 	break
-	// }
+	// Add to map
+	if _, ok := hashMapToValue[nHash]; !ok {
+		hashMapToValue[nHash] = make([]uint64, 0)
+	}
+	hashMapToValue[nHash] = append(hashMapToValue[nHash], lv*rv)
 
-	// treeCandidate := &Tree{
-	// 	leftSubtree.val * rightSubtree.val,
-	// 	leftSubtree,
-	// 	rightSubtree,
-	// }
+	return val
+}
 
-	// if !nTree.isSameStructure(treeCandidate) {
-	// 	panic(errors.New("fuck"))
-	// }
-
-	// if n == 16 {
-	// 	fmt.Println("waddup")
-	// }
-
-	// return leftSubtree.val * rightSubtree.val
-
-	/* */
-
-	// for i := 2; ; i++ {
-	// 	if i%100000 == 0 {
-	// 		fmt.Println(n, i)
-	// 	}
-	// 	iTree := buildTree(i)
-	// 	if nTree.isSameStructure(iTree) {
-	// 		return i
-	// 	}
-	// }
+func M(n uint64) uint64 {
+	return S(buildTree(factorial.DoubleFactorial(uint64(n))), 0)
 }
 
 func main() {
-	// t := buildTree(numberTheory.DoubleFactorial(9))
-	// u := t.copy()
+	// fmt.Println(S(buildTree(945), 0))
+
+	// t := buildTree(factorial.DoubleFactorial(9))
+	// // u := t.copy()
 	// t.Print()
+	// fmt.Printf("hash: %b\n", t.hash())
+	// t = buildTree(72)
+	// t.Print()
+	// fmt.Printf("hash: %b\n", t.hash())
+	// t = buildTree(3840)
+	// t.Print()
+	// fmt.Printf("hash: %b\n", t.hash())
+
+	fmt.Println(M(5))
+	fmt.Println(M(7))
+	fmt.Println(M(8))
+	fmt.Println(M(12))
+
+	// t = buildTree(180)
+	// fmt.Printf("hash: %b\n", t.hash())
+
 	// u.Print()
 	// fmt.Println(t.buildMatchingTreeRoot())
 
-	for i := int64(0); i < int64(math.Floor(math.Sqrt(float64(numberTheory.DoubleFactorial(int(BOUND)))))); i++ {
-		_ = buildTree(i)
-	}
+	// for i := int64(0); i < int64(math.Floor(math.Sqrt(float64(factorial.DoubleFactorial(int64(BOUND)))))); i++ {
+	// 	_ = buildTree(i)
+	// 	if i%10 == 0 {
+	// 		fmt.Println(i)
+	// 	}
+	// }
 
-	sum := int64(0)
-	for n := int64(2); n <= BOUND; n++ {
+	sum := uint64(0)
+	for n := uint64(2); n <= BOUND; n++ {
 		t := time.Now()
 		Mn := M(n)
 		sum += Mn
