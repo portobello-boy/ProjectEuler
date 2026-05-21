@@ -8,17 +8,17 @@ import (
 
 func Test_boundedPrimeSequenceProducer(t *testing.T) {
 	type args struct {
-		bound int
+		bound uint
 	}
 	tests := []struct {
 		name string
 		args args
-		want []int
+		want []uint
 	}{
 		{
 			name: "Primes below 10",
 			args: args{10},
-			want: []int{2, 3, 5, 7},
+			want: []uint{2, 3, 5, 7},
 		},
 	}
 	for _, tt := range tests {
@@ -36,22 +36,22 @@ func Test_boundedPrimeSequenceProducer(t *testing.T) {
 
 func TestBoundedPrimeSequence(t *testing.T) {
 	type args struct {
-		bound int
+		bound uint
 	}
 	tests := []struct {
 		name string
 		args args
-		want []int
+		want []uint
 	}{
 		{
 			name: "Primes below 10",
 			args: args{10},
-			want: []int{2, 3, 5, 7},
+			want: []uint{2, 3, 5, 7},
 		},
 		{
 			name: "Primes below 100",
 			args: args{100},
-			want: []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97},
+			want: []uint{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97},
 		},
 	}
 	for _, tt := range tests {
@@ -65,22 +65,22 @@ func TestBoundedPrimeSequence(t *testing.T) {
 
 func Test_primeSequenceProducer(t *testing.T) {
 	type args struct {
-		n int
+		n uint
 	}
 	tests := []struct {
 		name string
 		args args
-		want []int
+		want []uint
 	}{
 		{
 			name: "First 10 primes",
 			args: args{10},
-			want: []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29},
+			want: []uint{2, 3, 5, 7, 11, 13, 17, 19, 23, 29},
 		},
 		{
 			name: "0 primes",
 			args: args{0},
-			want: []int{},
+			want: []uint{},
 		},
 	}
 	for _, tt := range tests {
@@ -100,31 +100,25 @@ func Test_primeSequenceProducer(t *testing.T) {
 
 func TestPrimeSequence(t *testing.T) {
 	type args struct {
-		n int
+		n uint
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    []int
+		want    []uint
 		wantErr bool
 	}{
 		{
 			name:    "First 11 primes",
 			args:    args{11},
-			want:    []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31},
+			want:    []uint{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31},
 			wantErr: false,
 		},
 		{
 			name:    "0 primes",
 			args:    args{0},
-			want:    []int{},
+			want:    []uint{},
 			wantErr: false,
-		},
-		{
-			name:    "Invalid bound",
-			args:    args{-1},
-			want:    nil,
-			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -137,6 +131,41 @@ func TestPrimeSequence(t *testing.T) {
 			for i, p := range p {
 				if p != tt.want[i] {
 					t.Errorf("PrimeSequence() = %v, want %v", p, tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+func TestMillerRabinPrimality(t *testing.T) {
+	type args struct {
+		nums []uint
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name:    "First 11 primes",
+			args:    args{[]uint{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name:    "0 primes",
+			args:    args{[]uint{4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20}},
+			want:    false,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, v := range tt.args.nums {
+				if res := IsProbablePrime(v); res != tt.want {
+					t.Errorf("IsProbablePrime(%v) = %v, want %v", v, res, tt.want)
+					// return
 				}
 			}
 		})
