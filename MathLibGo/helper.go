@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"hash/fnv"
-
-	lru "github.com/hashicorp/golang-lru/v2"
 )
 
 type Hashable interface {
@@ -48,15 +46,18 @@ func CacheWrapper_ManyToSingle[R Hashable](f func(p1 R, p2 ...R) R) func(p1 R, p
 }
 
 func CacheWrapper_SingleToSingle[R, S any](f func(p R) S) func(p R) S {
-	l, _ := lru.New[any, *S](128)
+	// l, _ := lru.New[any, *S](16384)
+	m := make(map[any]*S)
 
 	return func(p R) S {
-		if cv, ok := l.Get(p); ok == true {
+		// if cv, ok := l.Get(p); ok == true {
+		if cv, ok := m[p]; ok {
 			// fmt.Printf("Cached %d!\n", *cv)
 			return *cv
 		}
 		cv := f(p)
-		l.Add(p, &cv)
+		// l.Add(p, &cv)
+		m[p] = &cv
 
 		return cv
 	}
